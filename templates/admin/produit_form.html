@@ -1,0 +1,76 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Modifier' if produit else 'Nouveau' }} Produit{% endblock %}
+{% block page_title %}<i class="fas fa-{% if produit %}pen{% else %}plus{% endif %}" style="color:#E03131;margin-right:8px;"></i>{{ 'Modifier le produit' if produit else 'Nouveau produit' }}{% endblock %}
+
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-card">
+        <div class="admin-form-header">
+            <div class="admin-form-header-icon">{{ produit.emoji if produit else '🍽️' }}</div>
+            <div>
+                <h3>{{ 'Modifier : ' + produit.nom if produit else 'Ajouter un produit au catalogue' }}</h3>
+                <p>{{ 'Mise à jour des informations' if produit else 'Nouveau plat, boisson ou épicerie' }}</p>
+            </div>
+        </div>
+        <form method="POST" id="produitForm" class="admin-form-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div style="grid-column:1/-1;">
+                    <label class="field-label">Nom du produit *</label>
+                    <input type="text" name="nom" class="field-ctrl" placeholder="Ex: Poulet Braisé Signature" required value="{{ produit.nom if produit else '' }}">
+                </div>
+                <div>
+                    <label class="field-label">Catégorie *</label>
+                    <select name="categorie" class="field-ctrl">
+                        {% for cat in ['Restaurant','Boissons','Épicerie','Autres'] %}
+                        <option value="{{ cat }}" {% if produit and produit.categorie == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="field-label">Emoji / Icône</label>
+                    <input type="text" name="emoji" class="field-ctrl" placeholder="🍗" maxlength="4" value="{{ produit.emoji if produit else '🍽️' }}" style="font-size:1.1rem;">
+                </div>
+                <div>
+                    <label class="field-label">Prix (FCFA) *</label>
+                    <input type="number" name="prix" class="field-ctrl" placeholder="0" min="0" step="50" required value="{{ produit.prix if produit else '' }}">
+                </div>
+                <div>
+                    <label class="field-label">Stock initial *</label>
+                    <input type="number" name="quantite" class="field-ctrl" placeholder="0" min="0" required value="{{ produit.quantite if produit else '' }}">
+                </div>
+                <div>
+                    <label class="field-label">Temps prép. (min)</label>
+                    <input type="number" name="temps_prep" class="field-ctrl" placeholder="20" min="1" value="{{ produit.temps_prep if produit else 20 }}">
+                </div>
+                <div style="grid-column:1/-1;">
+                    <label class="field-label">Description courte <span style="font-weight:400;text-transform:none;font-size:.68rem;">(affichée dans le catalogue)</span></label>
+                    <input type="text" name="description_courte" class="field-ctrl" placeholder="Ex: Poulet braisé aux épices maison" maxlength="200" value="{{ produit.description_courte if produit else '' }}">
+                </div>
+                <div style="grid-column:1/-1;">
+                    <label class="field-label">Description complète</label>
+                    <textarea name="description" class="field-ctrl" rows="3" placeholder="Description détaillée, ingrédients, conseils…">{{ produit.description if produit else '' }}</textarea>
+                </div>
+                <div>
+                    <div class="field-check">
+                        <input type="checkbox" name="disponible" id="disponible" {% if not produit or produit.disponible %}checked{% endif %}>
+                        <label for="disponible"><i class="fas fa-eye" style="color:#059669;margin-right:4px;"></i> Visible sur le site</label>
+                    </div>
+                </div>
+                <div>
+                    <div class="field-check">
+                        <input type="checkbox" name="en_vedette" id="en_vedette" {% if produit and produit.en_vedette %}checked{% endif %}>
+                        <label for="en_vedette"><i class="fas fa-star" style="color:#C4973A;margin-right:4px;"></i> Mettre en vedette (accueil)</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="admin-form-footer">
+            <a href="{{ url_for('admin_inventaire') }}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Annuler</a>
+            <button type="submit" form="produitForm" class="btn-save">
+                <i class="fas fa-{% if produit %}save{% else %}plus{% endif %}"></i>
+                {{ 'Mettre à jour' if produit else 'Ajouter au catalogue' }}
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

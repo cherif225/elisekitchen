@@ -1,0 +1,68 @@
+{% extends "public/base.html" %}
+{% block title %}Catalogue — ELISE KITCHEN{% endblock %}
+{% block content %}
+<div class="section">
+    <div class="section-header">
+        <div class="section-eyebrow">Notre menu</div>
+        <h2 class="section-title">Catalogue complet</h2>
+        <p class="section-sub">{{ produits | length }} article{{ 's' if produits | length != 1 }} disponible{{ 's' if produits | length != 1 }}</p>
+    </div>
+
+    <div class="catalogue-toolbar">
+        <div class="cat-filters">
+            <a href="{{ url_for('catalogue') }}" class="filter-pill-pub {% if not categorie_active %}active{% endif %}">Tous</a>
+            {% set cat_emoji = {'Restaurant':'🍴','Boissons':'🥤','Épicerie':'🛒','Autres':'📦'} %}
+            {% for cat in categories %}
+            <a href="{{ url_for('catalogue', categorie=cat.categorie) }}"
+               class="filter-pill-pub {% if categorie_active == cat.categorie %}active{% endif %}">
+                {{ cat_emoji.get(cat.categorie, '') }} {{ cat.categorie }}
+                <span style="opacity:0.6;font-size:0.7rem;">({{ cat.nb }})</span>
+            </a>
+            {% endfor %}
+        </div>
+        <form method="GET" action="{{ url_for('catalogue') }}" class="search-pub" role="search">
+            <i class="fas fa-search"></i>
+            <input type="text" name="q" value="{{ q }}" placeholder="Rechercher un plat…" aria-label="Recherche">
+            {% if categorie_active %}<input type="hidden" name="categorie" value="{{ categorie_active }}">{% endif %}
+        </form>
+    </div>
+
+    {% if produits %}
+    <div class="produits-grid">
+        {% for p in produits %}
+        <article class="produit-card">
+            <div class="produit-card-thumb">
+                <span>{{ p.emoji or '🍽️' }}</span>
+                {% if p.en_vedette %}<span class="badge-vedette">⭐ Spécialité</span>{% endif %}
+                <span class="badge-cat-prod">{{ p.categorie }}</span>
+            </div>
+            <div class="produit-card-body">
+                <a href="{{ url_for('produit_detail', id=p.id) }}" style="text-decoration:none;">
+                    <div class="produit-nom">{{ p.nom }}</div>
+                </a>
+                <div class="produit-desc">{{ p.description_courte or '' }}</div>
+                {% if p.temps_prep %}
+                <div style="font-size:0.72rem;color:var(--text-light);margin-bottom:10px;">
+                    <i class="fas fa-clock" style="color:var(--or);margin-right:3px;"></i>~{{ p.temps_prep }} min
+                </div>
+                {% endif %}
+                <div class="produit-card-footer">
+                    <div class="produit-prix">{{ p.prix | fcfa }}<span> FCFA</span></div>
+                    <button class="btn-add-cart" onclick="addAndAnimate(this, {{ p.id }})"
+                            title="Ajouter au panier" aria-label="Ajouter {{ p.nom }}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:80px 20px;color:var(--text-light);">
+        <i class="fas fa-search" style="font-size:3rem;margin-bottom:16px;display:block;color:var(--or);opacity:0.5;"></i>
+        <p style="font-size:1rem;margin-bottom:16px;">Aucun produit trouvé{% if q %} pour « {{ q }} »{% endif %}.</p>
+        <a href="{{ url_for('catalogue') }}" style="color:var(--rouge);font-weight:600;">← Voir tout le catalogue</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

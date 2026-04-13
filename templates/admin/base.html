@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin{% endblock %} — ELISE KITCHEN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/admin.css') }}" rel="stylesheet">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="admin-sidebar" id="adminSidebar" role="navigation" aria-label="Navigation admin">
+    <div class="sb-brand">
+        <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo" class="sb-logo">
+        <div class="sb-brand-text">
+            <div class="sb-brand-name">ELISE KITCHEN</div>
+            <div class="sb-brand-sub">Administration</div>
+        </div>
+    </div>
+    <div class="sb-nav">
+        <div class="sb-section-title">Principal</div>
+        <a href="{{ url_for('admin_dashboard') }}" class="sb-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-pie"></i><span class="sb-label">Tableau de bord</span>
+        </a>
+        <div class="sb-section-title">Commandes</div>
+        <a href="{{ url_for('admin_commandes') }}" class="sb-item {% if request.endpoint in ['admin_commandes','admin_commande_detail','admin_maj_statut'] %}active{% endif %}">
+            <i class="fas fa-bag-shopping"></i><span class="sb-label">Commandes</span>
+            {% if nouvelles_commandes > 0 %}<span class="sb-badge">{{ nouvelles_commandes }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('admin_factures') }}" class="sb-item {% if request.endpoint in ['admin_factures','admin_facture'] %}active{% endif %}">
+            <i class="fas fa-file-invoice"></i><span class="sb-label">Factures</span>
+        </a>
+        <div class="sb-section-title">Catalogue</div>
+        <a href="{{ url_for('admin_inventaire') }}" class="sb-item {% if request.endpoint in ['admin_inventaire','admin_ajouter_produit','admin_modifier_produit','admin_supprimer_produit'] %}active{% endif %}">
+            <i class="fas fa-boxes-stacked"></i><span class="sb-label">Inventaire</span>
+        </a>
+        <div class="sb-section-title">Répertoires</div>
+        <a href="{{ url_for('admin_clients') }}" class="sb-item {% if request.endpoint in ['admin_clients','admin_client_detail','admin_ajouter_client','admin_modifier_client'] %}active{% endif %}">
+            <i class="fas fa-users"></i><span class="sb-label">Clients</span>
+        </a>
+        <a href="{{ url_for('admin_fournisseurs') }}" class="sb-item {% if request.endpoint in ['admin_fournisseurs','admin_ajouter_fournisseur','admin_modifier_fournisseur','admin_supprimer_fournisseur'] %}active{% endif %}">
+            <i class="fas fa-truck"></i><span class="sb-label">Fournisseurs</span>
+        </a>
+        <div class="sb-section-title">Externe</div>
+        <a href="{{ url_for('home') }}" class="sb-item" target="_blank" rel="noopener">
+            <i class="fas fa-globe"></i><span class="sb-label">Voir le site</span>
+        </a>
+    </div>
+    <div class="sb-footer">
+        <div class="sb-user-avatar">{{ session.get('admin_nom', 'A')[0].upper() }}</div>
+        <div class="sb-user-info">
+            <div class="sb-user-name">{{ session.get('admin_nom', 'Admin') }}</div>
+            <div class="sb-user-role">{{ session.get('admin_role', '') }}</div>
+        </div>
+        <a href="{{ url_for('admin_logout') }}" class="sb-logout" title="Déconnexion" aria-label="Se déconnecter">
+            <i class="fas fa-right-from-bracket"></i>
+        </a>
+    </div>
+</nav>
+
+<!-- TOPBAR -->
+<header class="admin-topbar" id="adminTopbar" role="banner">
+    <button class="topbar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar" type="button">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+        {% if nouvelles_commandes > 0 %}
+        <a href="{{ url_for('admin_commandes', statut='nouvelle') }}" class="topbar-bell" title="{{ nouvelles_commandes }} nouvelle(s) commande(s)">
+            <i class="fas fa-bell"></i>
+            <span class="bell-dot"></span>
+        </a>
+        {% endif %}
+        <span class="topbar-date" id="topbarDate"></span>
+        <a href="{{ url_for('home') }}" class="topbar-link" target="_blank" rel="noopener">
+            <i class="fas fa-external-link-alt"></i> Site
+        </a>
+    </div>
+</header>
+
+<!-- MAIN -->
+<main class="admin-main" id="adminMain" role="main">
+    <!-- Flash messages -->
+    <div id="flashWrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="flash-item flash-{{ cat }}" role="alert">
+            <i class="fas fa-{% if cat == 'success' %}check-circle{% elif cat == 'danger' %}exclamation-circle{% elif cat == 'warning' %}triangle-exclamation{% else %}info-circle{% endif %}"></i>
+            {{ msg }}
+            <button class="flash-close" onclick="this.parentElement.remove()" type="button" aria-label="Fermer">✕</button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    {% block content %}{% endblock %}
+</main>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

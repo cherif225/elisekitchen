@@ -1,0 +1,120 @@
+{% extends "public/base.html" %}
+{% block title %}{{ produit.nom }} — ELISE KITCHEN{% endblock %}
+{% block content %}
+<div class="section" style="max-width:900px;">
+    <a href="{{ url_for('catalogue') }}" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-light);font-size:0.85rem;margin-bottom:24px;font-family:'DM Sans',sans-serif;">
+        <i class="fas fa-arrow-left"></i> Retour au catalogue
+    </a>
+    <div style="background:white;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-lg);display:grid;grid-template-columns:1fr 1fr;">
+        <div style="background:linear-gradient(135deg,var(--brun),var(--brun-mid));display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;min-height:380px;position:relative;">
+            <div style="font-size:7rem;filter:drop-shadow(0 8px 20px rgba(0,0,0,0.3));">{{ produit.emoji or '🍽️' }}</div>
+            {% if produit.en_vedette %}
+            <span style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:var(--or);color:var(--brun);font-size:0.75rem;font-weight:700;padding:5px 16px;border-radius:100px;white-space:nowrap;">
+                ⭐ Spécialité de la maison
+            </span>
+            {% endif %}
+        </div>
+        <div style="padding:40px;">
+            <div style="font-size:0.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--or);margin-bottom:8px;">{{ produit.categorie }}</div>
+            <h1 style="font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:900;color:var(--brun);line-height:1.2;margin-bottom:12px;">{{ produit.nom }}</h1>
+            {% if produit.temps_prep %}
+            <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--text-light);background:var(--creme-dk);padding:5px 12px;border-radius:100px;margin-bottom:16px;">
+                <i class="fas fa-clock" style="color:var(--or);"></i> Prêt en ~{{ produit.temps_prep }} minutes
+            </div>
+            {% endif %}
+            {% if produit.description_courte %}
+            <p style="font-size:0.95rem;color:var(--text-mid);margin-bottom:12px;font-weight:500;line-height:1.5;">{{ produit.description_courte }}</p>
+            {% endif %}
+            {% if produit.description %}
+            <p style="font-size:0.875rem;color:var(--text-light);line-height:1.7;margin-bottom:24px;">{{ produit.description }}</p>
+            {% endif %}
+            <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--rouge);margin-bottom:24px;">
+                {{ produit.prix | fcfa }} <span style="font-size:0.9rem;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--text-light);">FCFA</span>
+            </div>
+            <!-- Quantité + ajouter -->
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                <div class="qty-control-pub">
+                    <button class="qty-btn-pub" onclick="changeDetQty(-1)" type="button" aria-label="Diminuer">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input class="qty-num-pub" type="number" id="detQty" value="1" min="1" max="{{ produit.quantite or 99 }}" aria-label="Quantité">
+                    <button class="qty-btn-pub" onclick="changeDetQty(1)" type="button" aria-label="Augmenter">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <button id="addBtn" onclick="addFromDetail({{ produit.id }})" class="btn-commander" style="flex:1;" type="button">
+                    <i class="fas fa-basket-shopping"></i> Ajouter au panier
+                </button>
+            </div>
+            {% if produit.quantite is not none %}
+            {% if produit.quantite == 0 %}
+            <div style="background:#FFF0F0;color:#B91C1C;padding:10px 14px;border-radius:8px;font-size:0.82rem;">
+                <i class="fas fa-circle-xmark" style="margin-right:6px;"></i> Temporairement indisponible
+            </div>
+            {% elif produit.quantite < 5 %}
+            <div style="background:#FFFBEB;color:#92400E;padding:10px 14px;border-radius:8px;font-size:0.82rem;">
+                <i class="fas fa-triangle-exclamation" style="margin-right:6px;"></i>
+                Plus que {{ produit.quantite }} disponible{{ 's' if produit.quantite > 1 }}
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% if suggestions %}
+    <div style="margin-top:56px;">
+        <div class="section-header" style="margin-bottom:24px;">
+            <div class="section-eyebrow">Vous aimerez aussi</div>
+            <h3 class="section-title" style="font-size:1.4rem;">Dans la même catégorie</h3>
+        </div>
+        <div class="produits-grid">
+            {% for p in suggestions %}
+            <article class="produit-card">
+                <div class="produit-card-thumb"><span>{{ p.emoji or '🍽️' }}</span></div>
+                <div class="produit-card-body">
+                    <a href="{{ url_for('produit_detail', id=p.id) }}" style="text-decoration:none;">
+                        <div class="produit-nom">{{ p.nom }}</div>
+                    </a>
+                    <div class="produit-desc">{{ p.description_courte or '' }}</div>
+                    <div class="produit-card-footer">
+                        <div class="produit-prix">{{ p.prix | fcfa }}<span> FCFA</span></div>
+                        <button class="btn-add-cart" onclick="addAndAnimate(this,{{ p.id }})" type="button">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function changeDetQty(d){
+    const i=document.getElementById('detQty');
+    i.value=Math.max(1,Math.min({{ produit.quantite or 99 }},parseInt(i.value)+d));
+}
+function addFromDetail(id){
+    const qty=parseInt(document.getElementById('detQty').value)||1;
+    const btn=document.getElementById('addBtn');
+    btn.disabled=true;
+    btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Ajout…';
+    fetch('/panier/ajouter',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({produit_id:id,quantite:qty})})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){
+            btn.innerHTML='<i class="fas fa-check"></i> Ajouté !';
+            btn.style.background='#27ae60';
+            if(window.updateNavBadge) updateNavBadge(d.nb_panier);
+            if(window.showToast) showToast(d.message);
+            setTimeout(()=>{btn.innerHTML='<i class="fas fa-basket-shopping"></i> Ajouter au panier';btn.style.background='';btn.disabled=false;},2000);
+        } else {
+            if(window.showToast) showToast(d.message||'Erreur','error');
+            btn.innerHTML='<i class="fas fa-basket-shopping"></i> Ajouter au panier';btn.disabled=false;
+        }
+    }).catch(()=>{btn.innerHTML='<i class="fas fa-basket-shopping"></i> Ajouter au panier';btn.disabled=false;});
+}
+</script>
+{% endblock %}

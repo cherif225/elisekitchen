@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% block title %}Fournisseurs{% endblock %}
+{% block page_title %}<i class="fas fa-truck" style="color:#E03131;margin-right:8px;"></i>Fournisseurs{% endblock %}
+
+{% block content %}
+<div class="admin-toolbar">
+    <div class="search-admin">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher…" value="{{ q }}">
+    </div>
+    <a href="{{ url_for('admin_ajouter_fournisseur') }}" class="btn-add"><i class="fas fa-plus"></i> Nouveau Fournisseur</a>
+</div>
+<div class="panel">
+    <table class="admin-table" id="fTable">
+        <thead>
+            <tr><th>Société</th><th>Contact</th><th>Téléphone</th><th>Email</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            {% for f in fournisseurs %}
+            <tr>
+                <td><i class="fas fa-building" style="color:#9CA3AF;margin-right:8px;"></i><strong>{{ f.nom_societe }}</strong></td>
+                <td style="color:#6B7280;">{{ f.contact or '—' }}</td>
+                <td><a href="tel:{{ f.telephone }}" style="color:#2563EB;font-size:.85rem;">{{ f.telephone or '—' }}</a></td>
+                <td style="color:#6B7280;font-size:.82rem;">{{ f.email or '—' }}</td>
+                <td>
+                    <div class="btn-acts">
+                        <a href="{{ url_for('admin_modifier_fournisseur', id=f.id) }}" class="btn-act btn-edit" title="Modifier"><i class="fas fa-pen"></i></a>
+                        <a href="{{ url_for('admin_supprimer_fournisseur', id=f.id) }}" class="btn-act btn-del" title="Supprimer"
+                           onclick="return confirm('Supprimer {{ f.nom_societe }} ?')"><i class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="empty-admin"><i class="fas fa-truck"></i><p>Aucun fournisseur enregistré.</p></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('searchInput').addEventListener('input', function(){
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#fTable tbody tr').forEach(r => {
+        r.style.display = (!q || r.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

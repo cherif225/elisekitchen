@@ -1,0 +1,24 @@
+{% extends "public/base.html" %}
+{% block title %}{{ titre | default('Page introuvable') }} — ELISE KITCHEN{% endblock %}
+{% block content %}
+<div style="text-align:center;padding:120px 20px;max-width:500px;margin:0 auto;">
+    <div style="font-size:5rem;margin-bottom:16px;">🍽️</div>
+    <h1 style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--brun);margin-bottom:10px;">
+        {{ titre | default('404') }}
+    </h1>
+    <p style="font-size:1rem;color:var(--text-mid);margin-bottom:8px;font-weight:500;">
+        {{ msg | default('Cette page est introuvable') }}
+    </p>
+    <p style="color:var(--text-light);margin-bottom:36px;font-size:0.9rem;">
+        {{ 'Comme un plat qui n\'est plus à la carte…' if not msg else '' }}
+    </p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="{{ url_for('home') }}" class="btn-hero-primary" style="display:inline-flex;">
+            <i class="fas fa-home"></i> Accueil
+        </a>
+        <a href="{{ url_for('catalogue') }}" class="btn-hero-secondary" style="display:inline-flex;border-color:var(--brun);color:var(--brun);">
+            <i class="fas fa-utensils"></i> Catalogue
+        </a>
+    </div>
+</div>
+{% endblock %}

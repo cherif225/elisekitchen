@@ -1,0 +1,95 @@
+{% extends "admin/base.html" %}
+{% block title %}Inventaire{% endblock %}
+{% block page_title %}<i class="fas fa-boxes-stacked" style="color:#E03131;margin-right:8px;"></i>Inventaire & Catalogue{% endblock %}
+
+{% block content %}
+<div class="admin-toolbar">
+    <div class="search-admin">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher un produit…" value="{{ q }}">
+    </div>
+    <div class="filter-tabs">
+        <a href="{{ url_for('admin_inventaire') }}" class="filter-tab {% if not cat %}active{% endif %}">Tous</a>
+        {% for c in categories %}
+        <a href="{{ url_for('admin_inventaire', cat=c) }}" class="filter-tab {% if cat == c %}active{% endif %}">{{ c }}</a>
+        {% endfor %}
+    </div>
+    <a href="{{ url_for('admin_ajouter_produit') }}" class="btn-add"><i class="fas fa-plus"></i> Nouveau Produit</a>
+</div>
+
+<div class="panel">
+    <div style="overflow-x:auto;">
+        <table class="admin-table" id="inventaireTable">
+            <thead>
+                <tr><th>Produit</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Valeur</th><th>Visible</th><th>Vedette</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for p in produits %}
+                <tr style="{% if p.quantite == 0 %}background:#FFF5F5;{% elif p.quantite < 5 %}background:#FFFBEB;{% endif %}">
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span style="font-size:1.4rem;width:32px;text-align:center;">{{ p.emoji or '🍽️' }}</span>
+                            <div>
+                                <strong style="color:#111827;">{{ p.nom }}</strong>
+                                {% if p.description_courte %}
+                                <br><span style="font-size:.7rem;color:#9CA3AF;">{{ p.description_courte | truncate(45, True, '…') }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td><span style="background:#F3F4F6;color:#374151;padding:3px 10px;border-radius:100px;font-size:.72rem;font-weight:500;">{{ p.categorie }}</span></td>
+                    <td style="font-weight:700;color:#059669;">{{ p.prix | fcfa }} F</td>
+                    <td>
+                        <span class="alert-qty {% if p.quantite == 0 %}qty-zero{% elif p.quantite < 5 %}qty-low{% else %}qty-ok{% endif %}">
+                            {{ p.quantite }}
+                        </span>
+                    </td>
+                    <td style="color:#6B7280;font-size:.8rem;">{{ (p.prix * p.quantite) | fcfa }} F</td>
+                    <td>
+                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:.72rem;padding:3px 8px;border-radius:100px;
+                            {% if p.disponible %}background:#ECFDF5;color:#065F46;{% else %}background:#F3F4F6;color:#9CA3AF;{% endif %}">
+                            <i class="fas fa-{% if p.disponible %}eye{% else %}eye-slash{% endif %}"></i>
+                            {{ 'Oui' if p.disponible else 'Non' }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if p.en_vedette %}<span style="color:#C4973A;font-size:.8rem;"><i class="fas fa-star"></i></span>
+                        {% else %}<span style="color:#D1D5DB;">—</span>{% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-acts">
+                            <a href="{{ url_for('admin_modifier_produit', id=p.id) }}" class="btn-act btn-edit" title="Modifier"><i class="fas fa-pen"></i></a>
+                            <a href="{{ url_for('admin_supprimer_produit', id=p.id) }}" class="btn-act btn-del" title="Désactiver"
+                               onclick="return confirm('Désactiver {{ p.nom }} ?')"><i class="fas fa-eye-slash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="empty-admin"><i class="fas fa-box-open"></i><p>Aucun produit trouvé{% if q %} pour « {{ q }} »{% endif %}.</p></td></tr>
+                {% endfor %}
+            </tbody>
+            {% if produits %}
+            <tfoot>
+                <tr>
+                    <td colspan="2"><strong>{{ produits | length }} produit(s)</strong></td>
+                    <td></td>
+                    <td><strong>{{ produits | sum(attribute='quantite') }} unités</strong></td>
+                    <td><strong style="color:#059669;">{{ (produits | sum(attribute='quantite')) | fcfa }} unités</strong></td>
+                    <td colspan="3"></td>
+                </tr>
+            </tfoot>
+            {% endif %}
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('searchInput').addEventListener('input', function(){
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#inventaireTable tbody tr').forEach(r => {
+        r.style.display = (!q || r.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

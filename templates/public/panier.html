@@ -1,0 +1,97 @@
+{% extends "public/base.html" %}
+{% block title %}Mon Panier — ELISE KITCHEN{% endblock %}
+{% block content %}
+<div class="section">
+    <div class="section-header" style="margin-bottom:28px;">
+        <div class="section-eyebrow">Mon panier</div>
+        <h2 class="section-title">{% if items %}{{ items|length }} article{{ 's' if items|length > 1 }}{% else %}Panier vide{% endif %}</h2>
+    </div>
+
+    {% if items %}
+    <div class="panier-layout">
+        <!-- Articles -->
+        <div>
+            <div class="panier-card">
+                <div class="panier-card-header">
+                    <span>Articles sélectionnés</span>
+                    <a href="{{ url_for('vider_panier') }}" style="font-size:0.78rem;color:var(--rouge);font-weight:500;"
+                       onclick="return confirm('Vider le panier ?')">
+                        <i class="fas fa-trash"></i> Vider
+                    </a>
+                </div>
+                {% for item in items %}
+                <div class="panier-item" id="item-{{ item.id }}">
+                    <div class="item-emoji">{{ item.emoji }}</div>
+                    <div class="item-info">
+                        <div class="item-nom">{{ item.nom }}</div>
+                        <div class="item-cat">{{ item.categorie }} · {{ item.prix | fcfa }} FCFA / unité</div>
+                    </div>
+                    <div class="qty-control-pub">
+                        <button class="qty-btn-pub" onclick="changeQty({{ item.id }}, -1)" type="button" aria-label="Diminuer">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input class="qty-num-pub" type="number" value="{{ item.quantite }}"
+                               id="qty-{{ item.id }}" min="0"
+                               onchange="changeQty({{ item.id }}, 0, this.value)"
+                               aria-label="Quantité {{ item.nom }}">
+                        <button class="qty-btn-pub" onclick="changeQty({{ item.id }}, 1)" type="button" aria-label="Augmenter">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="item-prix" id="prix-{{ item.id }}">{{ (item.prix * item.quantite) | fcfa }} F</div>
+                    <button class="item-del" onclick="changeQty({{ item.id }}, 0, 0)" type="button" aria-label="Supprimer {{ item.nom }}">
+                        <i class="fas fa-xmark"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            <div style="margin-top:14px;">
+                <a href="{{ url_for('catalogue') }}" style="color:var(--text-mid);font-size:0.85rem;font-weight:500;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="fas fa-arrow-left"></i> Continuer mes achats
+                </a>
+            </div>
+        </div>
+
+        <!-- Récapitulatif -->
+        <div class="recapitulatif">
+            <div class="recap-title">Récapitulatif</div>
+            {% for item in items %}
+            <div class="recap-line">
+                <span>{{ item.emoji }} {{ item.nom | truncate(28, True, '…') }} ×{{ item.quantite }}</span>
+                <span>{{ (item.prix * item.quantite) | fcfa }} F</span>
+            </div>
+            {% endfor %}
+            <div class="recap-total">
+                <div class="recap-total-label">Total</div>
+                <div class="recap-total-prix" id="recap-total">{{ total | fcfa }} FCFA</div>
+            </div>
+            <a href="{{ url_for('commander') }}" class="btn-commander">
+                <i class="fas fa-arrow-right"></i> Valider la commande
+            </a>
+            <div style="text-align:center;margin-top:12px;font-size:0.72rem;color:var(--text-light);">
+                <i class="fas fa-shield-halved" style="color:var(--or);margin-right:4px;"></i>
+                Commande sécurisée — Paiement à la livraison / au retrait
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div style="text-align:center;padding:80px 20px;">
+        <div style="font-size:5rem;margin-bottom:20px;">🛒</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--brun);margin-bottom:12px;">Votre panier est vide</div>
+        <p style="color:var(--text-light);margin-bottom:28px;">Découvrez nos plats et produits pour commencer votre commande.</p>
+        <a href="{{ url_for('catalogue') }}" class="btn-hero-primary" style="display:inline-flex;">
+            <i class="fas fa-utensils"></i> Voir le catalogue
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+/* Les prix côté client pour mise à jour instantanée */
+const PRICES = {
+    {% for item in items %}{{ item.id }}: {{ item.prix }}{% if not loop.last %}, {% endif %}{% endfor %}
+};
+</script>
+{% endblock %}

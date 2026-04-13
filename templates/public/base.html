@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ELISE KITCHEN — Cuisine africaine authentique. Commandez en ligne vos plats, boissons et épicerie fine.">
+    <title>{% block title %}ELISE KITCHEN{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/public.css') }}" rel="stylesheet">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar-pub" role="navigation" aria-label="Navigation principale">
+    <a href="{{ url_for('home') }}" class="nav-brand">
+        <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo ELISE KITCHEN">
+        <span>ELISE KITCHEN</span>
+    </a>
+    <ul class="nav-links" role="list">
+        <li><a href="{{ url_for('home') }}"       class="{% if request.endpoint == 'home' %}active{% endif %}">Accueil</a></li>
+        <li><a href="{{ url_for('catalogue') }}"  class="{% if request.endpoint in ['catalogue','produit_detail'] %}active{% endif %}">Catalogue</a></li>
+        <li><a href="{{ url_for('suivi_form') }}" class="{% if request.endpoint in ['suivi_form','suivi_commande'] %}active{% endif %}">Suivi</a></li>
+    </ul>
+    <div class="nav-right">
+        <a href="{{ url_for('suivi_form') }}" class="btn-suivi-nav" title="Suivre une commande">
+            <i class="fas fa-magnifying-glass"></i> <span>Suivi</span>
+        </a>
+        <a href="{{ url_for('panier') }}" class="btn-panier" id="nav-panier" aria-label="Panier">
+            <i class="fas fa-basket-shopping"></i>
+            <span id="nav-panier-txt">Panier{% if nb_panier %} ({{ nb_panier }}){% endif %}</span>
+            {% if nb_panier > 0 %}
+            <span class="panier-badge" id="nav-badge">{{ nb_panier }}</span>
+            {% endif %}
+        </a>
+    </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-pub" role="alert">
+    {% for cat, msg in messages %}
+    <div class="flash-pub-item flash-pub-{{ cat }}">
+        <i class="fas fa-{% if cat == 'success' %}check-circle{% elif cat == 'danger' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+        {{ msg }}
+        <button onclick="this.parentElement.remove()" class="flash-close-pub" aria-label="Fermer">×</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- CONTENU PRINCIPAL -->
+<main id="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- FOOTER -->
+<footer class="footer-pub" role="contentinfo">
+    <div class="footer-grid">
+        <div>
+            <div class="footer-brand-name">ELISE KITCHEN</div>
+            <div class="footer-brand-sub">Delicious &amp; made with love</div>
+            <p class="footer-brand-desc">Restaurant gastronomique africain et épicerie fine. Commandez en ligne, dégustez avec amour.</p>
+        </div>
+        <div>
+            <div class="footer-col-title">Navigation</div>
+            <ul class="footer-links">
+                <li><a href="{{ url_for('home') }}">Accueil</a></li>
+                <li><a href="{{ url_for('catalogue') }}">Catalogue complet</a></li>
+                <li><a href="{{ url_for('panier') }}">Mon panier</a></li>
+                <li><a href="{{ url_for('suivi_form') }}">Suivi commande</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Contact</div>
+            <ul class="footer-links">
+                <li><a href="tel:+22500000000"><i class="fas fa-phone" style="width:16px;"></i> +225 00 00 00 00</a></li>
+                <li><a href="#"><i class="fas fa-map-marker-alt" style="width:16px;"></i> Abidjan, Côte d'Ivoire</a></li>
+                <li><a href="mailto:contact@elisekitchen.ci"><i class="fas fa-envelope" style="width:16px;"></i> contact@elisekitchen.ci</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>© {{ annee }} ELISE KITCHEN — Tous droits réservés</span>
+        <a href="{{ url_for('admin_login') }}" style="color:rgba(255,255,255,0.2);font-size:0.72rem;" title="Administration">
+            <i class="fas fa-lock"></i> Admin
+        </a>
+    </div>
+</footer>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container" aria-live="polite"></div>
+
+<script src="{{ url_for('static', filename='js/public.js') }}"></script>
+{% block scripts %}{% endblock %}
+
+<style>
+/* Flash messages publics */
+.flash-pub { max-width:1200px; margin:12px auto; padding:0 40px; }
+.flash-pub-item {
+    display:flex; align-items:center; gap:10px;
+    padding:12px 18px; border-radius:10px; margin-bottom:8px;
+    font-size:0.875rem; font-family:'DM Sans',sans-serif;
+    animation:slideDown 0.3s ease;
+}
+.flash-pub-success { background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; }
+.flash-pub-danger  { background:#FFF0F0; color:#B91C1C; border:1px solid #FECACA; }
+.flash-pub-warning { background:#FFFBEB; color:#92400E; border:1px solid #FDE68A; }
+.flash-pub-info    { background:#EFF6FF; color:#1E40AF; border:1px solid #BFDBFE; }
+.flash-close-pub { margin-left:auto; background:none; border:none; cursor:pointer; opacity:0.5; font-size:1.2rem; line-height:1; }
+.flash-close-pub:hover { opacity:1; }
+@keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+@media(max-width:640px) { .flash-pub { padding:0 16px; } }
+</style>
+</body>
+</html>

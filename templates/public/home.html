@@ -1,0 +1,132 @@
+{% extends "public/base.html" %}
+{% block title %}ELISE KITCHEN — Cuisine Africaine Authentique, Commandez en ligne{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero" aria-label="Présentation">
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <div class="hero-pill"><span></span> Commandes en ligne ouvertes</div>
+            <h1 class="hero-title">
+                La cuisine africaine<br>
+                <em>authentique</em>,<br>
+                livrée chez vous
+            </h1>
+            <p class="hero-desc">
+                Plats traditionnels préparés avec passion, jus naturels et épicerie fine.
+                Commandez en quelques clics, récupérez sur place ou faites-vous livrer.
+            </p>
+            <div class="hero-ctas">
+                <a href="{{ url_for('catalogue') }}" class="btn-hero-primary">
+                    <i class="fas fa-utensils"></i> Commander maintenant
+                </a>
+                <a href="{{ url_for('suivi_form') }}" class="btn-hero-secondary">
+                    <i class="fas fa-magnifying-glass"></i> Suivre ma commande
+                </a>
+            </div>
+        </div>
+        <div class="hero-image-block">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="ELISE KITCHEN" class="hero-logo-circle">
+            <div class="hero-stats">
+                <div class="stat-pill"><div class="stat-num">{{ vedettes|length + 12 }}+</div><div class="stat-label">Articles</div></div>
+                <div class="stat-pill"><div class="stat-num">⚡</div><div class="stat-label">Rapide</div></div>
+                <div class="stat-pill"><div class="stat-num">❤️</div><div class="stat-label">Avec amour</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CATÉGORIES -->
+{% if categories %}
+<div class="section">
+    <div class="section-header">
+        <div class="section-eyebrow">Explorer</div>
+        <h2 class="section-title">Nos catégories</h2>
+        <p class="section-sub">Plats chauds, boissons fraîches et épicerie sélectionnée</p>
+    </div>
+    <div class="cat-grid">
+        {% set cat_emojis = {'Restaurant':'🍴','Boissons':'🥤','Épicerie':'🛒','Autres':'📦'} %}
+        {% for cat in categories %}
+        <a href="{{ url_for('catalogue', categorie=cat.categorie) }}" class="cat-card">
+            <span class="cat-emoji">{{ cat_emojis.get(cat.categorie, '🍽️') }}</span>
+            <div class="cat-name">{{ cat.categorie }}</div>
+            <div class="cat-nb">{{ cat.nb }} article{{ 's' if cat.nb > 1 }}</div>
+            <span class="cat-arrow">→ Voir tout</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- PRODUITS VEDETTES -->
+{% if vedettes %}
+<div class="section-full section-bg-alt">
+<div class="section" style="padding-top:0;padding-bottom:0;">
+    <div class="section-header">
+        <div class="section-eyebrow">Nos spécialités</div>
+        <h2 class="section-title">Plats &amp; produits du moment</h2>
+        <p class="section-sub">Sélectionnés par notre chef pour leur authenticité et leur saveur</p>
+    </div>
+    <div class="produits-grid">
+        {% for p in vedettes %}
+        <article class="produit-card">
+            <div class="produit-card-thumb">
+                <span>{{ p.emoji or '🍽️' }}</span>
+                <span class="badge-vedette">⭐ Coup de cœur</span>
+                <span class="badge-cat-prod">{{ p.categorie }}</span>
+            </div>
+            <div class="produit-card-body">
+                <a href="{{ url_for('produit_detail', id=p.id) }}" style="text-decoration:none;">
+                    <div class="produit-nom">{{ p.nom }}</div>
+                </a>
+                <div class="produit-desc">{{ p.description_courte or '' }}</div>
+                <div class="produit-card-footer">
+                    <div class="produit-prix">{{ p.prix | fcfa }}<span> FCFA</span></div>
+                    <button class="btn-add-cart" onclick="addAndAnimate(this, {{ p.id }})"
+                            title="Ajouter au panier" aria-label="Ajouter {{ p.nom }} au panier">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+        <a href="{{ url_for('catalogue') }}" class="btn-hero-secondary"
+           style="display:inline-flex;border-color:var(--brun);color:var(--brun);padding:12px 32px;">
+            <i class="fas fa-list"></i> Voir tout le catalogue
+        </a>
+    </div>
+</div>
+</div>
+{% endif %}
+
+<!-- COMMENT ÇA MARCHE -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-eyebrow">Simple &amp; Rapide</div>
+        <h2 class="section-title">Comment commander ?</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px;">
+        {% for num, icon, titre, desc in [
+            ('1','fas fa-search',           'Choisissez',    'Parcourez notre catalogue de plats et produits'),
+            ('2','fas fa-basket-shopping',  'Ajoutez',       'Sélectionnez vos articles et ajustez les quantités'),
+            ('3','fas fa-pen-to-square',    'Validez',       'Renseignez vos infos de livraison ou retrait'),
+            ('4','fas fa-check-circle',     'C\'est parti !','Recevez votre confirmation et suivez en temps réel')
+        ] %}
+        <div style="position:relative;padding:28px 20px 24px;background:white;border-radius:16px;
+                    box-shadow:0 4px 24px rgba(61,31,10,0.07);border:1px solid rgba(196,151,58,0.1);
+                    text-align:center;">
+            <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+                        width:28px;height:28px;background:var(--brun);color:var(--or);
+                        border-radius:50%;display:flex;align-items:center;justify-content:center;
+                        font-weight:800;font-size:0.82rem;">{{ num }}</div>
+            <i class="{{ icon }}" style="font-size:1.8rem;color:var(--or);margin:8px 0 10px;display:block;"></i>
+            <div style="font-family:'Playfair Display',serif;font-weight:700;color:var(--brun);margin-bottom:6px;font-size:0.95rem;">{{ titre }}</div>
+            <div style="font-size:0.8rem;color:var(--text-light);line-height:1.6;">{{ desc }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

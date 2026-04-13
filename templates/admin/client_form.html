@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Modifier' if client else 'Nouveau' }} Client{% endblock %}
+{% block page_title %}<i class="fas fa-user-pen" style="color:#E03131;margin-right:8px;"></i>{{ 'Modifier le client' if client else 'Nouveau client' }}{% endblock %}
+
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-card">
+        <div class="admin-form-header">
+            <div class="admin-form-header-icon">👤</div>
+            <div>
+                <h3>{{ 'Modifier : ' + client.nom if client else 'Ajouter un client' }}</h3>
+                <p>{{ 'Mise à jour de la fiche client' if client else 'Nouveau client au répertoire' }}</p>
+            </div>
+        </div>
+        <form method="POST" class="admin-form-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div style="grid-column:1/-1;">
+                    <label class="field-label">Nom complet *</label>
+                    <input type="text" name="nom" class="field-ctrl" placeholder="Ex: Koffi Ange" required value="{{ client.nom if client else '' }}" autocomplete="off">
+                </div>
+                <div>
+                    <label class="field-label">Téléphone</label>
+                    <input type="tel" name="telephone" class="field-ctrl" placeholder="+225 07 00 00 00" value="{{ client.telephone if client else '' }}">
+                </div>
+                <div>
+                    <label class="field-label">Email</label>
+                    <input type="email" name="email" class="field-ctrl" placeholder="client@email.com" value="{{ client.email if client else '' }}">
+                </div>
+                <div style="grid-column:1/-1;">
+                    <label class="field-label">Adresse</label>
+                    <input type="text" name="adresse" class="field-ctrl" placeholder="Quartier, Ville" value="{{ client.adresse if client else '' }}">
+                </div>
+                <div>
+                    <label class="field-label">Type de client</label>
+                    <select name="type_client" class="field-ctrl">
+                        {% for t, lbl in [('particulier','Particulier'),('professionnel','Professionnel'),('vip','⭐ VIP')] %}
+                        <option value="{{ t }}" {% if client and client.type_client == t %}selected{% endif %}>{{ lbl }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </form>
+        <div class="admin-form-footer">
+            <a href="{{ url_for('admin_clients') }}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Annuler</a>
+            <button class="btn-save" onclick="document.querySelector('form').submit();">
+                <i class="fas fa-{% if client %}save{% else %}plus{% endif %}"></i>
+                {{ 'Mettre à jour' if client else 'Ajouter' }}
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

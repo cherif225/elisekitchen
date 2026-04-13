@@ -1,0 +1,98 @@
+{% extends "admin/base.html" %}
+{% block title %}Commandes{% endblock %}
+{% block page_title %}<i class="fas fa-bag-shopping" style="color:#E03131;margin-right:8px;"></i>Gestion des Commandes{% endblock %}
+
+{% block content %}
+<div class="admin-toolbar">
+    <div class="filter-tabs">
+        <a href="{{ url_for('admin_commandes') }}" class="filter-tab {% if not statut_filtre %}active{% endif %}">
+            Toutes <span class="count">{{ comptages.values() | sum }}</span>
+        </a>
+        {% for s, lbl, ico in [
+            ('nouvelle','Nouvelles','inbox'),
+            ('confirmée','Confirmées','check'),
+            ('en_preparation','En prép.','fire'),
+            ('prête','Prêtes','star'),
+            ('livrée','Livrées','check-double'),
+            ('annulée','Annulées','xmark')
+        ] %}
+        <a href="{{ url_for('admin_commandes', statut=s) }}"
+           class="filter-tab {% if statut_filtre == s %}active{% endif %}">
+            <i class="fas fa-{{ ico }}" style="font-size:.7rem;margin-right:3px;"></i>{{ lbl }}
+            {% if comptages.get(s, 0) > 0 %}<span class="count">{{ comptages.get(s, 0) }}</span>{% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    <a href="{{ url_for('admin_commandes') }}" class="btn-secondary" style="margin-left:auto;">
+        <i class="fas fa-rotate"></i> Actualiser
+    </a>
+</div>
+
+<div class="panel">
+    {% if commandes %}
+    <div style="overflow-x:auto;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>N° Commande</th><th>Client</th><th>Téléphone</th>
+                    <th>Articles</th><th>Montant</th><th>Type</th>
+                    <th>Statut</th><th>Date</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in commandes %}
+                <tr style="{% if c.statut == 'nouvelle' %}background:#FFFBEB;{% endif %}">
+                    <td>
+                        <strong style="color:#E03131;font-size:.8rem;display:block;">{{ c.numero }}</strong>
+                        {% if c.statut == 'nouvelle' %}
+                        <span style="font-size:.62rem;background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:100px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;">
+                            <i class="fas fa-circle" style="font-size:.35rem;animation:pulse 1s infinite;"></i> Nouvelle
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong style="font-size:.875rem;">{{ c.client_nom | truncate(22, True, '…') }}</strong>
+                        {% if c.client_email %}<br><span style="font-size:.7rem;color:#9CA3AF;">{{ c.client_email | truncate(24, True, '…') }}</span>{% endif %}
+                    </td>
+                    <td><a href="tel:{{ c.client_telephone }}" style="color:#2563EB;font-size:.82rem;">{{ c.client_telephone }}</a></td>
+                    <td style="color:#6B7280;font-size:.82rem;">{{ c.nb_items }} art.</td>
+                    <td style="font-weight:700;color:#059669;font-size:.875rem;">{{ c.montant_total | fcfa }} F</td>
+                    <td>
+                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:.72rem;padding:3px 9px;border-radius:100px;
+                            {% if c.type_livraison == 'livraison' %}background:#EFF6FF;color:#1D4ED8;{% else %}background:#ECFDF5;color:#065F46;{% endif %}">
+                            <i class="fas fa-{% if c.type_livraison == 'livraison' %}motorcycle{% else %}store{% endif %}"></i>
+                            {{ 'Livraison' if c.type_livraison == 'livraison' else 'Retrait' }}
+                        </span>
+                    </td>
+                    <td><span class="cmd-badge badge-{{ c.statut | statut_css }}">{{ c.statut | statut_label }}</span></td>
+                    <td style="color:#9CA3AF;font-size:.75rem;white-space:nowrap;">
+                        {{ c.date_commande | datefr }}<br>
+                        <span style="font-size:.7rem;">{{ c.date_commande | datefr('%H:%M') }}</span>
+                    </td>
+                    <td>
+                        <div class="btn-acts">
+                            <a href="{{ url_for('admin_commande_detail', id=c.id) }}" class="btn-act btn-view" title="Voir détail"><i class="fas fa-eye"></i></a>
+                            <a href="{{ url_for('admin_facture', cmd_id=c.id) }}" class="btn-act btn-print" title="Facture"><i class="fas fa-print"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4"><strong>{{ commandes | length }} commande(s){% if statut_filtre %} — filtre : {{ statut_filtre }}{% endif %}</strong></td>
+                    <td colspan="2"><strong style="color:#059669;">{{ commandes | sum(attribute='montant_total') | fcfa }} FCFA</strong></td>
+                    <td colspan="3"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-admin">
+        <i class="fas fa-inbox"></i>
+        <p>Aucune commande{% if statut_filtre %} avec le statut « {{ statut_filtre | statut_label }} »{% endif %}.</p>
+    </div>
+    {% endif %}
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+{% endblock %}

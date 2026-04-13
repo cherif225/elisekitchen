@@ -1,0 +1,109 @@
+{% extends "public/base.html" %}
+{% block title %}Commande {{ commande.numero }} — Suivi — ELISE KITCHEN{% endblock %}
+{% block content %}
+{% set statut_steps = [('nouvelle','Reçue','inbox'),('confirmée','Confirmée','check'),('en_preparation','En préparation','fire'),('prête','Prête !','star'),('livrée','Livrée','check-double')] %}
+{% set statut_idx = {'nouvelle':0,'confirmée':1,'en_preparation':2,'prête':3,'livrée':4,'annulée':-1} %}
+{% set current_idx = statut_idx.get(commande.statut, 0) %}
+
+<div class="section" style="max-width:700px;">
+    <a href="{{ url_for('suivi_form') }}" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-light);font-size:0.85rem;margin-bottom:24px;">
+        <i class="fas fa-arrow-left"></i> Nouvelle recherche
+    </a>
+
+    <div style="background:white;border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden;margin-bottom:20px;">
+        <!-- En-tête -->
+        <div style="background:var(--brun);padding:24px 28px;color:white;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div>
+                <div style="font-size:0.7rem;opacity:0.6;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Commande</div>
+                <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--or);">{{ commande.numero }}</div>
+                <div style="font-size:0.75rem;opacity:0.6;margin-top:2px;">{{ commande.date_commande | datefr_hm }}</div>
+            </div>
+            <div>
+                {% set s = commande.statut %}
+                {% set statut_styles = {
+                    'nouvelle': ('statut-nouvelle', 'Nouvelle'),
+                    'confirmée': ('statut-confirmee', 'Confirmée'),
+                    'en_preparation': ('statut-en_preparation', 'En préparation'),
+                    'prête': ('statut-prete', 'Prête !'),
+                    'livrée': ('statut-livree', 'Livrée'),
+                    'annulée': ('statut-annulee', 'Annulée')
+                } %}
+                {% set css_cls, label = statut_styles.get(s, ('statut-nouvelle', s)) %}
+                <span class="statut-badge {{ css_cls }}">
+                    <i class="fas fa-circle" style="font-size:0.4rem;"></i> {{ label }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Timeline statut (masquée si annulée) -->
+        {% if commande.statut != 'annulée' %}
+        <div style="padding:24px 28px;border-bottom:1px solid var(--creme-dk);">
+            <div style="display:flex;justify-content:space-between;">
+                {% for key, lbl, icon in statut_steps %}
+                {% set is_done = current_idx >= loop.index0 %}
+                <div style="flex:1;text-align:center;position:relative;">
+                    {% if not loop.last %}
+                    <div style="position:absolute;top:15px;left:50%;width:100%;height:2px;
+                                background:{% if is_done %}var(--or){% else %}var(--creme-dk){% endif %};z-index:0;"></div>
+                    {% endif %}
+                    <div style="width:30px;height:30px;border-radius:50%;margin:0 auto 8px;
+                                position:relative;z-index:1;display:flex;align-items:center;justify-content:center;
+                                font-size:0.7rem;font-weight:700;
+                                background:{% if is_done %}var(--or){% else %}var(--creme-dk){% endif %};
+                                color:{% if is_done %}var(--brun){% else %}var(--text-light){% endif %};">
+                        <i class="fas fa-{{ icon }}" style="font-size:0.68rem;"></i>
+                    </div>
+                    <div style="font-size:0.65rem;color:{% if is_done %}var(--brun){% else %}var(--text-light){% endif %};font-weight:{% if is_done %}600{% else %}400{% endif %};">{{ lbl }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div style="padding:16px 28px;background:#FFF0F0;border-bottom:1px solid #FECACA;font-size:0.875rem;color:#B91C1C;">
+            <i class="fas fa-circle-xmark" style="margin-right:6px;"></i>
+            Cette commande a été annulée.
+        </div>
+        {% endif %}
+
+        <!-- Infos client + livraison -->
+        <div style="padding:20px 28px;display:grid;grid-template-columns:1fr 1fr;gap:14px;border-bottom:1px solid var(--creme-dk);">
+            <div style="background:var(--creme);border-radius:10px;padding:14px;">
+                <div style="font-size:0.65rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Client</div>
+                <div style="font-weight:600;color:var(--brun);">{{ commande.client_nom }}</div>
+                <div style="font-size:0.82rem;color:var(--text-mid);">{{ commande.client_telephone }}</div>
+            </div>
+            <div style="background:var(--creme);border-radius:10px;padding:14px;">
+                <div style="font-size:0.65rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Réception</div>
+                <div style="font-weight:600;color:var(--brun);display:flex;align-items:center;gap:6px;">
+                    <i class="fas fa-{% if commande.type_livraison == 'livraison' %}motorcycle{% else %}store{% endif %}" style="color:var(--or);"></i>
+                    {{ 'Livraison' if commande.type_livraison == 'livraison' else 'Retrait sur place' }}
+                </div>
+                {% if commande.client_adresse %}
+                <div style="font-size:0.78rem;color:var(--text-light);margin-top:4px;">{{ commande.client_adresse }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Articles -->
+        <div style="padding:20px 28px;">
+            <div style="font-family:'Playfair Display',serif;font-weight:700;color:var(--brun);margin-bottom:14px;font-size:0.95rem;">Articles commandés</div>
+            {% for item in items %}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--creme-dk);font-size:0.875rem;">
+                <span style="color:var(--text-mid);">{{ item.quantite }}× {{ item.produit_nom }}</span>
+                <span style="font-weight:600;color:var(--rouge);">{{ item.sous_total | fcfa }} F</span>
+            </div>
+            {% endfor %}
+            <div style="display:flex;justify-content:space-between;padding:14px 0 0;font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--brun);">
+                <span>Total</span>
+                <span style="color:var(--rouge);">{{ commande.montant_total | fcfa }} FCFA</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;margin-top:12px;">
+        <a href="{{ url_for('catalogue') }}" class="btn-hero-primary" style="display:inline-flex;">
+            <i class="fas fa-utensils"></i> Commander à nouveau
+        </a>
+    </div>
+</div>
+{% endblock %}

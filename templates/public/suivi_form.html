@@ -1,0 +1,37 @@
+{% extends "public/base.html" %}
+{% block title %}Suivi de Commande — ELISE KITCHEN{% endblock %}
+{% block content %}
+<div class="section" style="max-width:560px;">
+    <div class="section-header">
+        <div class="section-eyebrow">Suivi</div>
+        <h2 class="section-title">Où en est ma commande ?</h2>
+        <p class="section-sub">Entrez votre numéro de commande reçu par confirmation</p>
+    </div>
+    <div style="background:white;border-radius:20px;padding:40px;box-shadow:var(--shadow-lg);">
+        <form method="POST" id="suiviForm">
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">
+                    Numéro de commande
+                </label>
+                <input type="text" name="numero" id="numeroCmde" placeholder="Ex: CMD-20260112-1234" required
+                       autocomplete="off" autocapitalize="characters" spellcheck="false"
+                       style="width:100%;padding:14px 18px;border:1.5px solid var(--creme-dk);border-radius:12px;font-size:1rem;font-family:'DM Sans',sans-serif;background:var(--creme);transition:all 0.2s;"
+                       onfocus="this.style.borderColor='var(--or)';this.style.background='white'"
+                       onblur="this.style.borderColor='var(--creme-dk)';this.style.background='var(--creme)'">
+            </div>
+            <button type="submit" class="btn-commander">
+                <i class="fas fa-magnifying-glass"></i> Rechercher ma commande
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('numeroCmde').addEventListener('input', function(){
+    const pos = this.selectionStart;
+    this.value = this.value.toUpperCase();
+    this.setSelectionRange(pos, pos);
+});
+</script>
+{% endblock %}

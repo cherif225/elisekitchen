@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Modifier' if fournisseur else 'Nouveau' }} Fournisseur{% endblock %}
+{% block page_title %}<i class="fas fa-truck" style="color:#E03131;margin-right:8px;"></i>{{ 'Modifier le fournisseur' if fournisseur else 'Nouveau fournisseur' }}{% endblock %}
+
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-card">
+        <div class="admin-form-header">
+            <div class="admin-form-header-icon">🏭</div>
+            <div>
+                <h3>{{ 'Modifier : ' + fournisseur.nom_societe if fournisseur else 'Ajouter un fournisseur' }}</h3>
+                <p>Partenaire d'approvisionnement</p>
+            </div>
+        </div>
+        <form method="POST" class="admin-form-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div style="grid-column:1/-1;">
+                    <label class="field-label">Nom de la société *</label>
+                    <input type="text" name="nom_societe" class="field-ctrl" placeholder="Ex: Grossiste Alimentaire SACI" required
+                           value="{{ fournisseur.nom_societe if fournisseur else '' }}">
+                </div>
+                <div>
+                    <label class="field-label">Nom du contact</label>
+                    <input type="text" name="contact" class="field-ctrl" placeholder="Ex: M. Kouassi Yao"
+                           value="{{ fournisseur.contact if fournisseur else '' }}">
+                </div>
+                <div>
+                    <label class="field-label">Téléphone</label>
+                    <input type="tel" name="telephone" class="field-ctrl" placeholder="+225 27 00 00 00"
+                           value="{{ fournisseur.telephone if fournisseur else '' }}">
+                </div>
+                <div>
+                    <label class="field-label">Email</label>
+                    <input type="email" name="email" class="field-ctrl" placeholder="contact@societe.ci"
+                           value="{{ fournisseur.email if fournisseur else '' }}">
+                </div>
+                <div>
+                    <label class="field-label">Adresse</label>
+                    <input type="text" name="adresse" class="field-ctrl" placeholder="Zone, Ville"
+                           value="{{ fournisseur.adresse if fournisseur else '' }}">
+                </div>
+            </div>
+        </form>
+        <div class="admin-form-footer">
+            <a href="{{ url_for('admin_fournisseurs') }}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Annuler</a>
+            <button class="btn-save" onclick="document.querySelector('form').submit();">
+                <i class="fas fa-{% if fournisseur %}save{% else %}plus{% endif %}"></i>
+                {{ 'Mettre à jour' if fournisseur else 'Ajouter' }}
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

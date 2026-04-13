@@ -1,0 +1,44 @@
+{% extends "public/base.html" %}
+{% block title %}Commande Confirmée {{ commande.numero }} — ELISE KITCHEN{% endblock %}
+{% block content %}
+<div class="section">
+    <div class="confirmation-hero">
+        <div class="check-circle">✓</div>
+        <h1 style="font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:900;color:var(--brun);margin-bottom:10px;">Commande confirmée !</h1>
+        <p style="color:var(--text-light);font-size:0.95rem;margin-bottom:20px;">Merci {{ commande.client_nom }} ! Votre commande a bien été reçue.</p>
+        <div class="conf-numero">{{ commande.numero }}</div>
+        <p style="color:var(--text-light);font-size:0.82rem;margin-bottom:36px;">Notez ce numéro pour suivre votre commande</p>
+
+        <!-- Détails commande -->
+        <div style="background:white;border-radius:16px;padding:24px;margin-bottom:28px;box-shadow:var(--shadow);text-align:left;max-width:480px;margin-left:auto;margin-right:auto;">
+            <div style="font-family:'Playfair Display',serif;font-weight:700;color:var(--brun);margin-bottom:14px;font-size:1rem;">📋 Récapitulatif</div>
+            {% for item in items %}
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--creme-dk);font-size:0.875rem;color:var(--text-mid);">
+                <span>{{ item.quantite }}× {{ item.produit_nom }}</span>
+                <span style="font-weight:600;">{{ item.sous_total | fcfa }} F</span>
+            </div>
+            {% endfor %}
+            <div style="display:flex;justify-content:space-between;padding:12px 0 0;font-weight:800;color:var(--rouge);font-size:1.1rem;">
+                <span>Total :</span>
+                <span>{{ commande.montant_total | fcfa }} FCFA</span>
+            </div>
+        </div>
+
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:12px;margin-bottom:32px;font-size:0.875rem;
+            background:{% if commande.type_livraison == 'livraison' %}#EFF6FF{% else %}#ECFDF5{% endif %};
+            color:{% if commande.type_livraison == 'livraison' %}#1D4ED8{% else %}#065F46{% endif %};">
+            <i class="fas fa-{% if commande.type_livraison == 'livraison' %}motorcycle{% else %}store{% endif %}"></i>
+            {% if commande.type_livraison == 'livraison' %}Livraison à votre adresse{% else %}Retrait sur place dès que prêt{% endif %}
+        </div>
+
+        <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+            <a href="{{ url_for('suivi_commande', numero=commande.numero) }}" class="btn-hero-primary">
+                <i class="fas fa-magnifying-glass"></i> Suivre ma commande
+            </a>
+            <a href="{{ url_for('catalogue') }}" class="btn-hero-secondary" style="border-color:var(--brun);color:var(--brun);">
+                <i class="fas fa-plus"></i> Commander encore
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

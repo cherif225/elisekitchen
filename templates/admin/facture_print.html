@@ -1,0 +1,114 @@
+{% extends "admin/base.html" %}
+{% block title %}Facture — {{ commande.numero }}{% endblock %}
+{% block page_title %}<i class="fas fa-print" style="color:#E03131;margin-right:8px;"></i>Facture — {{ commande.numero }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:16px;display:flex;gap:10px;" class="no-print">
+    <button onclick="window.print()" class="btn-add" type="button"><i class="fas fa-print"></i> Imprimer</button>
+    <a href="{{ url_for('admin_commande_detail', id=commande.id) }}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Retour commande</a>
+</div>
+
+<div class="facture-print-page">
+    <!-- En-tête -->
+    <div class="fp-header">
+        <div class="fp-logo-block">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo" class="fp-logo">
+            <div>
+                <div class="fp-brand">ELISE KITCHEN</div>
+                <div class="fp-sub">Cuisine Gastronomique &amp; Épicerie Fine</div>
+                <div class="fp-sub">+225 00 00 00 00 · Abidjan, Côte d'Ivoire</div>
+            </div>
+        </div>
+        <div class="fp-meta">
+            <div class="fp-num-label">Facture n°</div>
+            <div class="fp-num-value">{{ commande.numero }}</div>
+            <div class="fp-date" id="fpDate"></div>
+            <span style="display:inline-block;margin-top:7px;background:#ECFDF5;color:#065F46;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:100px;">✓ Validée</span>
+        </div>
+    </div>
+
+    <!-- Émetteur / Destinataire -->
+    <div class="fp-parties">
+        <div>
+            <div class="fp-party-label">Émetteur</div>
+            <div class="fp-party-name">ELISE KITCHEN</div>
+            <div class="fp-party-info">
+                Cuisine Gastronomique &amp; Épicerie Fine<br>
+                Abidjan, Côte d'Ivoire<br>
+                Tél : +225 00 00 00 00
+            </div>
+        </div>
+        <div class="fp-party-right">
+            <div class="fp-party-label">Destinataire</div>
+            <div class="fp-party-name">{{ commande.client_nom }}</div>
+            <div class="fp-party-info">
+                {% if commande.client_telephone %}Tél : {{ commande.client_telephone }}<br>{% endif %}
+                {% if commande.client_email %}{{ commande.client_email }}<br>{% endif %}
+                {% if commande.client_adresse %}{{ commande.client_adresse }}{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau articles -->
+    <div style="padding:0 40px;">
+        <table class="fp-table">
+            <thead>
+                <tr>
+                    <th style="width:50%;">Désignation</th>
+                    <th style="text-align:center;">Qté</th>
+                    <th style="text-align:right;">P.U. (FCFA)</th>
+                    <th style="text-align:right;">Total (FCFA)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td><strong>{{ item.produit_nom }}</strong></td>
+                    <td style="text-align:center;">{{ item.quantite }}</td>
+                    <td style="text-align:right;">{{ item.prix_unit | fcfa }}</td>
+                    <td style="text-align:right;font-weight:600;">{{ item.sous_total | fcfa }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="border-top:1px solid #E5E7EB;">
+                    <td colspan="3" style="text-align:right;padding:9px 14px;font-size:.85rem;color:#6B7280;">Sous-total HT :</td>
+                    <td style="text-align:right;padding:9px 14px;">{{ commande.montant_total | fcfa }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:right;padding:5px 14px;font-size:.85rem;color:#6B7280;">TVA (0%) :</td>
+                    <td style="text-align:right;padding:5px 14px;">0</td>
+                </tr>
+                <tr class="fp-total-row">
+                    <td colspan="3" style="text-align:right;padding:14px;">MONTANT TOTAL À PAYER :</td>
+                    <td style="text-align:right;padding:14px;">{{ commande.montant_total | fcfa }} FCFA</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Pied de page -->
+    <div class="fp-footer">
+        <div class="fp-footer-text">Arrêté la présente facture à la somme de <strong>{{ commande.montant_total | fcfa }} Francs CFA</strong>.</div>
+        <div class="fp-sigs">
+            <div class="fp-sig"><p>Le Client</p><div class="fp-sig-line"></div></div>
+            <div class="fp-sig"><p>La Direction ELISE KITCHEN</p><div class="fp-sig-line"></div></div>
+        </div>
+        <div class="fp-footer-text" style="color:#C4973A;font-style:italic;">"Delicious &amp; made with love" — ELISE KITCHEN © {{ annee }}</div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .admin-sidebar,.admin-topbar,.no-print{display:none!important}
+    .admin-main{margin:0!important;padding:0!important}
+    body{background:#fff!important}
+    .facture-print-page{box-shadow:none!important;max-width:100%!important}
+}
+</style>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('fpDate').textContent = 'Date : ' + new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
+</script>
+{% endblock %}
