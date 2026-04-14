@@ -94,3 +94,4 @@ elisekitchen/
 - Polling 30s : notification nouvelle commande
 
 © 2026 ELISE KITCHEN
+"# elisekitchen" 
