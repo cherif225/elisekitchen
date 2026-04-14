@@ -91,9 +91,9 @@ CREATE INDEX IF NOT EXISTS idx_produits_cat     ON produits(categorie, disponibl
 """
 
 UTILISATEURS = [
-    ('admin',  'admin123',   'Élise Konan',      'admin@elisekitchen.ci',  'admin'),
-    ('gerant', 'gerant123',  'Paul Yao',          'gerant@elisekitchen.ci', 'gerant'),
-    ('caisse', 'caisse123',  'Marie Caissière',   'caisse@elisekitchen.ci', 'caisse'),
+    ('admin',  'Fogue@2026',   'Fogue Deyo Delphine',      'admin@elisekitchen.ci',  'admin'),
+    ('gerant', 'Fogue@2026',  'Fogue Deyo Delphine',          'gerant@elisekitchen.ci', 'gerant'),
+    ('caisse', 'Fogue@2026',  'Fogue Deyo Delphine',   'caisse@elisekitchen.ci', 'caisse'),
 ]
 
 PRODUITS = [
